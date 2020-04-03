@@ -7,7 +7,6 @@ import network.commonClass.*;
 
 import java.util.ArrayList;
 
-
 /**
  * 标准通信协议处理类
  * @author ZiQin
@@ -534,6 +533,8 @@ public class MessageOperate {
         String[] items = msg.getText().substring(1).split("\f");
         int number = Integer.parseInt(items[0]);
         ArrayList<Group> groups = new ArrayList<Group>();
+        if (groups == null) 
+        	return groups;
         for (int i = 0; i < number; i++) {
         	String[] item = items[i + 1].split("\n");
             Group group = new GroupBuilder().id(item[0]).name(item[1]).createGroup();
@@ -655,7 +656,7 @@ public class MessageOperate {
      * @return 群主的意见（仅群id和群主意见（同意与否））
      */
     public static AddGroupResult unpackageAddGroupResFromOwner(Message msg) {
-        String[] item = msg.getText().substring(1).split("\f");
+        String[] item = msg.getText().substring(1).split("\f");     
         boolean ac = item[1].equals("true") ? true : false;
         return new AddGroupResult(item[0], null, ac);
     }

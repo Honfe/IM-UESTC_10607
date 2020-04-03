@@ -1,4 +1,4 @@
-package Core;
+package Windows;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -23,7 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import network.Builder.AccountBuilder;
+import RecvSendControll.RecvSendController;
 import network.commonClass.Account;
 import network.commonClass.Picture;
 import network.messageOperate.MessageOperate;
@@ -43,10 +43,12 @@ import java.util.List;
  * @version 1.0/0618
  * Init.
  */
-public class InfoModificationWindow extends JFrame{
+public class ModifyAccountInfoWindow extends JFrame{
+
+	private static final long serialVersionUID = 5724057651006461296L;
+	
 	private int i_window_width = 400;
 	private int i_window_height = 615;
-	private int userName = 122392319;
 	private Account account_modify;
 	
 	private boolean isImageModified = false;
@@ -65,7 +67,7 @@ public class InfoModificationWindow extends JFrame{
 		textField_phone,textField_mail,textField_location,
 		textField_person,textField_signature;
 	
-	public InfoModificationWindow(AccountInfoShowWindow wind_father,Account account) {
+	public ModifyAccountInfoWindow(ShowAccountInfoWindow wind_father,Account account) {
 		this.account_modify = account.clone();
 		
 		this.setTitle("KIM Info-Modification");
@@ -94,8 +96,8 @@ public class InfoModificationWindow extends JFrame{
 		panel_nickName.setPreferredSize(new Dimension(i_window_width,12));		// 设置panel大小
 		panel_nickName.setBorder(BorderFactory.createEmptyBorder(10,0,0,0));
 		
-		panel_phone = new JPanel();			// 电话号码面板：包含电话Label、电话TextField
-		label_phone = new JLabel("电 话：");
+		panel_phone = new JPanel();			// 手机号码面板：包含手机Label、手机TextField
+		label_phone = new JLabel("手 机：");
 		textField_phone = new JTextField(20);
 		textField_phone.setText(this.account_modify.getMobliePhone());
 		panel_phone.setPreferredSize(new Dimension(i_window_width,12));		// 设置panel大小
@@ -140,7 +142,7 @@ public class InfoModificationWindow extends JFrame{
 		label_loadImage = new JLabel(new ImageIcon("image/default.png"));			// 上传的头像
 		btn_upload = new JButton("上传→");		// 上传按钮
 		
-		String destPath = "./Client/image/" + InfoModificationWindow.this.account_modify.getId() +".jpg";	// 拷贝时用到的新文件路径
+		String destPath = "image/" + ModifyAccountInfoWindow.this.account_modify.getId() +".jpg";	// 拷贝时用到的新文件路径
 		btn_upload.addActionListener(new ActionListener() {		// 按钮点击事件
 			public void actionPerformed(ActionEvent e) {	
 				JFileChooser chooser = new JFileChooser();		// 设置选择器  
@@ -279,7 +281,7 @@ public class InfoModificationWindow extends JFrame{
 		btn_exec = new JButton("取消");
 		btn_exec.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
-				InfoModificationWindow.this.dispose();
+				ModifyAccountInfoWindow.this.dispose();
 			};
 		});
 		btn_ok = new JButton("完成");
@@ -300,7 +302,7 @@ public class InfoModificationWindow extends JFrame{
 				// 更新好友列表窗口的个人信息
 				RecvSendController.addToSendQueue(MessageOperate.packageAskUserDetail());
 				
-				InfoModificationWindow.this.dispose();
+				ModifyAccountInfoWindow.this.dispose();
 			}
 		});
 		FlowLayout flowLayout_Bottom = new FlowLayout();

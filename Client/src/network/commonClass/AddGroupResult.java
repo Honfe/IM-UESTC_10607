@@ -21,9 +21,9 @@ public class AddGroupResult {
      */
     private boolean accept;
 
-    public AddGroupResult(String uid, String gid, boolean accept) {
-        this.gid = new String(gid);
-        this.uid = new String(uid);
+    public AddGroupResult(String gid, String uid, boolean accept) {
+        this.gid = gid;
+        this.uid = uid;
         this.accept = accept;
     }
 

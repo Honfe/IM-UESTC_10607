@@ -1,4 +1,4 @@
-package Core;
+package Windows;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import javax.swing.*;
 
+import RecvSendControll.RecvSendController;
 import network.messageOperate.MessageOperate;
 /**
  * 登陆窗口
@@ -24,10 +25,15 @@ import network.messageOperate.MessageOperate;
  * 【添加】消息收发队列方法
  */
 public class LoginWindow extends JFrame{
+
+	private static final long serialVersionUID = 1929237671953594691L;
+	
 	private static final int 	i_window_width = 520;
 	private static final int 	i_window_height = 400;
 	private static LoginInfo	info_login;
-	private static final int	magic_number = 1234;
+	
+	@SuppressWarnings("unused")
+	private static final int	magic_number = 0;	// 相关代码已被注释
 		
 	JButton 			btn_login;
 	JPanel 				panel_bottom,panel_middle;
@@ -199,7 +205,9 @@ public class LoginWindow extends JFrame{
 		/* 进度条 */
 		pbar_login = new JProgressBar()
 		{
-		    public Dimension getPreferredSize() {
+			private static final long serialVersionUID = 430035137120641271L;
+
+			public Dimension getPreferredSize() {
 		    		return new Dimension(180, 17);
 		    }
 		};	
@@ -276,11 +284,11 @@ public class LoginWindow extends JFrame{
 				
 				System.out.println("LoginInfo: send to server. yhm: "+yhm);
 				System.out.println("LoginInfo: send to server. psw: "+psw);
-				try {
-					Thread.sleep(magic_number);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+//				try {
+//					Thread.sleep(magic_number);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
 				RecvSendController.addToSendQueue(MessageOperate.packageLoginMsg(yhm, psw));
 			}
 		};
@@ -323,49 +331,4 @@ public class LoginWindow extends JFrame{
 	}
 }
 
-/* 登陆信息类 用于记录窗口填入值 */
-class LoginInfo{
-	private boolean 			flag_rememberBtn;
-	private boolean 			flag_autoBtn;
-	private String 				str_login_yhm;
-	private String				str_login_psw;
-	
-	public LoginInfo() {
-		this.setLoginYhm(null);
-		this.setLoginPsw(null);
-		this.setAutoBtn(false);
-		this.setRememberBtn(false);
-	}
 
-	public boolean isRememberBtn() {
-		return flag_rememberBtn;
-	}
-
-	public void setRememberBtn(boolean flag_rememberBtn) {
-		this.flag_rememberBtn = flag_rememberBtn;
-	}
-
-	public boolean isAutoBtn() {
-		return flag_autoBtn;
-	}
-
-	public void setAutoBtn(boolean flag_autoBtn) {
-		this.flag_autoBtn = flag_autoBtn;
-	}
-
-	public String getLoginYhm() {
-		return str_login_yhm;
-	}
-
-	public void setLoginYhm(String str_login_yhm) {
-		this.str_login_yhm = str_login_yhm;
-	}
-
-	public String getLoginPsw() {
-		return str_login_psw;
-	}
-
-	public void setLoginPsw(String str_login_psw) {
-		this.str_login_psw = str_login_psw;
-	}
-}

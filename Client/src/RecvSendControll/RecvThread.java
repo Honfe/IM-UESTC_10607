@@ -1,6 +1,5 @@
-package Core;
+package RecvSendControll;
 
-import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -30,15 +29,11 @@ public class RecvThread extends Thread {
 			if(flag_recv) {
 				try {
 					queue_str_recv.put(net_controller.recvFromServer());
-				} catch (IOException e) {
+				} catch (Exception e) {
 					// 服务器断开了连接
 					System.out.println("RecvThreadError: net_recv. May be socket close.");
-					flag_recv = false;
-					net_controller.endConnect();
-					// e.printStackTrace();
-				} catch (InterruptedException e) {
-					System.out.println("RecvThreadError: queue_put.");
-					e.printStackTrace();
+					RecvSendController.closeConnection();
+					//e.printStackTrace();
 				}
 			}			
 		}

@@ -1,4 +1,4 @@
-package Core;
+package Windows;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,6 +12,9 @@ import java.util.Comparator;
 import java.util.Vector;
 import javax.swing.*;
 
+import RecvSendControll.RecvSendController;
+import Repertory.EnvelopeRepertory;
+import Repertory.GroupEnvelopeRepertory;
 import network.commonClass.Account;
 import network.commonClass.Envelope;
 import network.commonClass.Group;
@@ -33,7 +36,10 @@ import network.messageOperate.MessageOperate;
  * 【添加】消息收发队列方法
  * 【添加】更新个人信息的方法
  */
-public class FriendsListWindow extends JFrame{	
+public class ChatingListWindow extends JFrame{	
+
+	private static final long serialVersionUID = -5491561328761495340L;
+	
 	private static final int 	i_window_width = 320,i_window_height = 700;
 	private int 				i_loc_X,i_loc_Y;
 	
@@ -43,7 +49,10 @@ public class FriendsListWindow extends JFrame{
 	private int 				i_groups_sum;	//add
 	
 	private int 				i_online_count;
-	private String 				new_friend_id;	
+	private String 				new_friend_id;			//新的好友请求ID
+	
+	private String 				new_add_group_friend_id;	//新的加入群组用户ID
+	private String				new_add_group_id;			//新的加入群组ID
 	
 	private JScrollPane 		scroll_friends_list;
 	private JScrollPane			scroll_groups_list;
@@ -53,11 +62,11 @@ public class FriendsListWindow extends JFrame{
 	private JTabbedPane 		tabbed_pane;
 	private JList<String> 		jList_str_friendsName;
 	private JList<String>		jList_str_groupsName;		//add
-	private JButton				btn_manage_friend,btn_logout,btn_logoff,btn_new_friend_request;
+	private JButton				btn_manage_friend,btn_logout,
+								btn_new_friend_request,btn_new_group_friend_request;
 	
 	private ArrayList<Account> 	arrayList_account_friends;
-	private ArrayList<Group>	arrayList_account_groups;		//account type should be changed to group type
-	private ArrayList<Account>  arrayList_account_group_member;
+	private ArrayList<Group>	arrayList_account_groups;
 	
 	private Account 			account_newWindow;
 	private Group				group_newWindow;
@@ -68,7 +77,7 @@ public class FriendsListWindow extends JFrame{
 	/**
 	 * FriendsListWindow 构造函数
 	 */
-	public FriendsListWindow(){				
+	public ChatingListWindow(){				
 		/* 设置窗口基本信息 */
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);					// 设置关闭键操作
 		this.setIconImage((new ImageIcon("./Client/image/chick.png")).getImage());		// 设置图标
@@ -174,7 +183,7 @@ public class FriendsListWindow extends JFrame{
 					if(e.getClickCount() == 2){
 						setNewGroupWindowResource(arrayList_account_groups.get(jList_str_groupsName.getSelectedIndex()));
 						
-						WindowProducer.addWindowRequest(WindowProducer.GROUP_CHAT_WIND);				//更改CHAT_WIND 为 GROUP_CHAT_WIND
+						WindowProducer.addWindowRequest(WindowProducer.GROUP_CHAT_WIND);				
 						
 						RecvSendController.addToSendQueue(MessageOperate.packageUpdateGroup(arrayList_account_groups.
 								get(jList_str_groupsName.getSelectedIndex()).
@@ -198,7 +207,7 @@ public class FriendsListWindow extends JFrame{
 		
 		tabbed_pane.add("好友",panel_middle_friends);
 		tabbed_pane.add("群组",panel_middle_groups);
-		tabbed_pane.add("其他",panel_middle_else);
+//		tabbed_pane.add("其他",panel_middle_else);
 		
 		panel_middle_friends.add(scroll_friends_list);
 		panel_middle_groups.add(scroll_groups_list);
@@ -246,11 +255,34 @@ public class FriendsListWindow extends JFrame{
 			}
 		});
 		
+		btn_new_group_friend_request = new JButton("新的群组请求");
+		btn_new_group_friend_request.setVisible(false);
+		
+		btn_new_group_friend_request.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int option = JOptionPane.showConfirmDialog(null, 
+													"来自:" + new_add_group_friend_id + "的群组添加请求，是否同意？", "新的群组请求", 
+													JOptionPane.YES_NO_OPTION);
+				if(option == JOptionPane.YES_OPTION) {
+					System.out.println("ask group list 123");
+					RecvSendController.addToSendQueue(MessageOperate.packageAddGroupRes( new_add_group_id , new_add_group_friend_id, true));
+					RecvSendController.addToSendQueue(MessageOperate.packageAskGetGroupList());
+					System.out.println("ask group list");
+				}
+				else {
+					RecvSendController.addToSendQueue(MessageOperate.packageAddGroupRes( new_add_group_id , new_add_group_friend_id, false));
+				}
+				btn_new_group_friend_request.setVisible(false);
+			}
+		});
+		
 		FlowLayout flowLayout_Bottom = new FlowLayout();
 		flowLayout_Bottom.setAlignment(FlowLayout.RIGHT);	// 居右
 		panel_bottom.setLayout(flowLayout_Bottom);
 		
 		panel_bottom.add(btn_new_friend_request);
+		panel_bottom.add(btn_new_group_friend_request);
+		
 		panel_bottom.add(btn_manage_friend);
 		panel_bottom.add(btn_logout);
 		this.add(panel_bottom,BorderLayout.SOUTH);
@@ -264,6 +296,18 @@ public class FriendsListWindow extends JFrame{
 		}
 		else {
 			btn_new_friend_request.setVisible(false);
+		}
+	}
+	
+	/*
+	 * 设置新的好友添加请求可见状态
+	 */
+	public void setNewGroupRequesttBottonVisible(Boolean bool) {
+		if(bool == true) {
+			btn_new_group_friend_request.setVisible(true);
+		}
+		else {
+			btn_new_group_friend_request.setVisible(false);
 		}
 	}
 	/**
@@ -307,8 +351,8 @@ public class FriendsListWindow extends JFrame{
 	 * @param inArrList 从服务器获取到的群组信息数组
 	 */
 	public void updateGroupsList(ArrayList<Group> inArrList ){						//修改为群类型
-		setGroupsList(inArrList);			// 将传进来的好友列表设置到成员属性中
-		groupsListShow();					// 在窗口中显示最新的好友列表
+		setGroupsList(inArrList);			// 将传进来的群组列表设置到成员属性中
+		groupsListShow();					// 在窗口中显示最新的群组列表
 	}
 	
 	
@@ -327,6 +371,7 @@ public class FriendsListWindow extends JFrame{
 		temp_pic.reduceImage(70, 70);
 		temp_pic.reduceImageToCircle();
 		label_head_image.setIcon(new ImageIcon(temp_pic.getPictureBytes()));
+		label_head_image.setToolTipText(this.account_mine.getNikeName());
 		
 		label_name.setToolTipText("昵称："+this.account_mine.getNikeName());
 		label_sign.setToolTipText("个性签名："+this.account_mine.getSignature());
@@ -377,7 +422,7 @@ public class FriendsListWindow extends JFrame{
 	}
 	
 	/**
-	 * 将好友信息列表设置到JList组件中 予以展示
+	 * 将群组信息列表设置到JList组件中 予以展示
 	 */
 	public void groupsListShow(){		
 		Vector<String> vec_str_groupsName = new Vector<String>();
@@ -391,10 +436,14 @@ public class FriendsListWindow extends JFrame{
 			else
 				vec_str_groupsName.add(groupInfo.getName());
 		}
-			
+		
+//		System.out.println("number:"+i_groups_sum);
+//		for(String o : vec_str_groupsName) {
+//			System.out.println(o);
+//		}
+		
 		/* JList列表设置 */
 		jList_str_groupsName.setListData(vec_str_groupsName);
-//		scroll_groups_list.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		if(this.i_friends_sum >= 15)	// 对滚动条进行设置
 			scroll_friends_list.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		else
@@ -434,8 +483,8 @@ public class FriendsListWindow extends JFrame{
 		this.arrayList_account_friends = new ArrayList<Account>(inArrList);
 	}
 	
-	public void setGroupsList(ArrayList<Group> inArrList){		//参数改为群类型 : 已改
-		this.arrayList_account_groups = new ArrayList<Group>(inArrList);//参数改为群类型
+	public void setGroupsList(ArrayList<Group> inArrList){		
+		this.arrayList_account_groups = new ArrayList<Group>(inArrList);
 	}
 	
 	public String getGroupID() {
@@ -455,10 +504,10 @@ public class FriendsListWindow extends JFrame{
 		this.group_newWindow = new Group();
 		this.group_newWindow = group_account;
 		
-		System.out.println(group_account.getId()+" " +group_account.getName());
-		ArrayList<Account> test = new ArrayList<>();
-		test = group_account.getMember();
-		if(null == test) System.out.println("member null");
+//		System.out.println(group_account.getId()+" " +group_account.getName());
+//		ArrayList<Account> test = new ArrayList<>();
+//		test = group_account.getMember();		
+//		if(null == test) System.out.println("member null");
 //		for(int i=0;i<test.size();i++) {
 //			System.out.println(test.get(i).getNikeName());
 //		}
@@ -478,6 +527,13 @@ public class FriendsListWindow extends JFrame{
 		new_friend_id = str;
 	}
 	
+	public void setNewAddGroupFriendID(String gid , Account user) {
+		
+		new_add_group_id = gid;
+		
+		new_add_group_friend_id = user.getId();
+	}
+	
 	public void addFriendSuccessHint() {
 		JOptionPane.showMessageDialog(null, "添加好友成功", "提示", JOptionPane.INFORMATION_MESSAGE);
 	}
@@ -486,28 +542,34 @@ public class FriendsListWindow extends JFrame{
 		JOptionPane.showMessageDialog(null, "添加好友失败", "提示", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
-	public Vector<String> getFriendList(){		
-		Vector<String> vec_str_friendsName = new Vector<String>();
-		int friend_number =  arrayList_account_friends.size();
-		for(int i = 0 ; i < friend_number ; i++)
-			vec_str_friendsName.add( arrayList_account_friends.get(i).getId() + "     " +
-									 arrayList_account_friends.get(i).getNikeName() + "     " +
-									 arrayList_account_friends.get(i).getSignature());
-		return vec_str_friendsName;
+	public void addGroupSuccessHint() {
+		JOptionPane.showMessageDialog(null, "添加群组成功", "提示", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
-	public ArrayList<String> getGroupList(){		
-		ArrayList<String> vec_str_groupsName = new ArrayList<String>();
-		int group_number =  arrayList_account_groups.size();
-		for(int i = 0 ; i < group_number ; i++)
-			vec_str_groupsName.add( arrayList_account_groups.get(i).getName()+ "     " +
-									arrayList_account_groups.get(i).getId() + "     " +
-									arrayList_account_groups.get(i).getDescription());
-		return vec_str_groupsName;
-	}
+	public void addGroupFailureHing() {
+		JOptionPane.showMessageDialog(null, "添加群组失败", "提示", JOptionPane.INFORMATION_MESSAGE);
+	}	
 	
-//	public ArrayList<Account> getGroup(){
-//		ArrayList<Account> arrayList_account_groupList = new ArrayList<Account>();
-//		arrayList_account_groupList = this.arr
+//	public Vector<String> getFriendList(){		
+//		Vector<String> vec_str_friendsName = new Vector<String>();
+//		int friend_number =  arrayList_account_friends.size();
+//		for(int i = 0 ; i < friend_number ; i++)
+//			vec_str_friendsName.add( arrayList_account_friends.get(i).getId() + "     " +
+//									 arrayList_account_friends.get(i).getNikeName() + "     " +
+//									 arrayList_account_friends.get(i).getSignature());
+//		return vec_str_friendsName;
 //	}
+	
+	public ArrayList<Account> getFriendsList(){
+		ArrayList<Account> accounts = new ArrayList<>();
+		accounts = arrayList_account_friends;
+		return accounts;
+	}
+	public ArrayList<Group> getGroupList(){		
+		ArrayList<Group> groups = new ArrayList<>();
+		groups = arrayList_account_groups;
+		return groups;
+		
+	}
+
 }
